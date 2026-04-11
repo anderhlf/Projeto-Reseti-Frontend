@@ -20,13 +20,13 @@
 
                 <div class="space-y-1">
                     <label class="block text-sm font-semibold text-gray-700 ml-3">Senha</label>
-                    <div class="relative flex items-center">
+                    <div class="relative w-full">
                         <input v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
-                            class="w-full p-4 pr-12 rounded-full bg-white/60 border border-gray-200 outline-none shadow-inner focus:ring-2 focus:ring-blue-300 transition"
+                            class="w-full p-4 pr-14 rounded-full bg-white/60 border border-gray-200 outline-none shadow-inner focus:ring-2 focus:ring-blue-300 transition"
                             required />
 
                         <button type="button" @click="showPassword = !showPassword"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition focus:outline-none">
+                            class="absolute right-0 top-0 h-full w-14 flex items-center justify-center text-gray-500 hover:text-blue-600 transition focus:outline-none">
                             <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,8 +78,7 @@ const router = useRouter();
 
 const handleLogin = async () => {
     try {
-        // Porta 5000 conforme seu servidor Flask (após atualizar o Python)
-        const response = await axios.post('http://localhost:5000/auth/login', {
+        const response = await axios.post('http://localhost:5000/login', {
             identificador: loginValue.value,
             senha: password.value
         });
