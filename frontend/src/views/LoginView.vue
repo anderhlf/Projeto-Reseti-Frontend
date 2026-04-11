@@ -67,29 +67,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+    import { ref } from 'vue';
+    import api from '@/services/api'; // TODO Importante* Conecta em outras View ou componenetes essa importação
+    import { useRouter } from 'vue-router';
 
-const loginValue = ref('');
-const password = ref('');
-const showPassword = ref(false);
-const router = useRouter();
+    const loginValue = ref('');
+    const password = ref('');
+    const showPassword = ref(false);
+    const router = useRouter();
 
-const handleLogin = async () => {
-    try {
-        const response = await axios.post('http://localhost:5000/login', {
-            identificador: loginValue.value,
-            senha: password.value
-        });
+    const handleLogin = async () => {
+        try {
+            // TODO Importante* Aqui você so precisa passar a ROTA do Backend Prefixo (Ex:. /auth) + ROTA (/login)
+            const response = await api.post('/auth/login', {
+                email: loginValue.value,
+                senha: password.value
+            });
 
-        if (response.data.auth) {
-            localStorage.setItem('token', response.data.token);
-            router.push('/dashboard');
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user)); 
+                
+                router.push('/dashboard');
+            }
+        } catch (error) {
+            console.error('Erro no login:', error);
+            alert(error.response?.data?.error || 'Erro ao conectar com o servidor.');
         }
-    } catch (error) {
-        console.error('Erro no login:', error);
-        alert('Usuário ou senha incorretos.');
-    }
-};
+    };
 </script>

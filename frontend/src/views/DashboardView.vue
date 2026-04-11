@@ -13,7 +13,7 @@
 
       <div class="w-full bg-white/50 rounded-3xl p-8 shadow-inner border border-white/20 mb-10">
         <p class="text-gray-800 text-lg leading-relaxed text-center">
-          Bem-vindo, <strong class="text-blue-700">Milo</strong>!<br />
+          Bem-vindo, <strong class="text-blue-700">{nome}</strong>!<br />
           Este é o centro de controle do seu sistema de gestão de TI.
         </p>
       </div>
