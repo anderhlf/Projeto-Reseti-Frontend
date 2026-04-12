@@ -87,21 +87,26 @@ const stats = ref({
   os_pendentes: 0, 
   equipamentos_uso: 0, 
   reservas_hoje: 0, 
-  atividade: 88 
+  atividade: 0 
 });
 
-const manutencoes = ref([
-  { id: 1, nome: 'Servidor Principal - Setor TI', progresso: 75 }, 
-  { id: 2, nome: 'Servidor Principal - Setor TI', progresso: 75 }
-]);
+const manutencoes = ref([]);
 
+// Aqui vou pegar os dados vindo da API
 const buscarInformacoes = async () => {
   try {
+    const response = await api.get('/dashboard/dados/stats'); 
     
-    const response = await api.get('/equipamentos/dashboard/stats'); 
-    stats.value = response.data;
+    stats.value = {
+      os_pendentes: response.data.os_pendentes,
+      equipamentos_uso: response.data.equipamentos_uso,
+      reservas_hoje: response.data.reservas_hoje,
+      atividade: response.data.atividade
+    };
+
+    manutencoes.value = response.data.manutencoes;
     
-    console.log("Dados do Dashboard atualizados via API");
+    console.log("Dashboard RESETI sincronizado com sucesso!");
   } catch (error) {
     console.error("Erro ao carregar resumo:", error);
   }
