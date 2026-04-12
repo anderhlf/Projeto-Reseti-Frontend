@@ -23,10 +23,10 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button @click="irParaSolicitacoes" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                        <button @click="irParaSolicitacoes" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Ver Solicitações
                         </button>
-                        <button @click="abrirModalCriar" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                        <button @click="abrirModalCriar" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Criar Equipamento
                         </button>
                     </div>
@@ -43,7 +43,7 @@
                                     </span>
                                 </td>
                                 <td class="py-4 text-center">
-                                    <button @click="fazerReserva(item.id_equip)" :disabled="!podeReservar(item.status)"
+                                    <button @click="prepararReserva(item)" :disabled="!podeReservar(item.status)"
                                         :class="podeReservar(item.status) ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                                         class="text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-md transition active:scale-95">
                                         Realizar Reserva
@@ -72,7 +72,7 @@
                         
                         <div class="mb-8">
                             <h3 class="text-2xl font-black text-gray-950 uppercase tracking-tighter italic">Novo Equipamento</h3>
-                            <div class="h-1.5 w-16 bg-purple-600 mt-2 rounded-full"></div>
+                            <div class="h-1.5 w-16 bg-blue-600 mt-2 rounded-full"></div>
                         </div>
 
                         <form @submit.prevent="salvarNovoEquipamento" class="space-y-5">
@@ -106,12 +106,61 @@
 
                             <div class="flex gap-4 pt-6">
                                 <button @click="fecharModalCriar" type="button" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-black uppercase py-4 rounded-2xl transition active:scale-95">Cancelar</button>
-                                <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black uppercase py-4 rounded-2xl shadow-lg transition active:scale-95">Confirmar</button>
+                                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 font-black uppercase py-4 rounded-2xl shadow-lg transition active:scale-95">Confirmar</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </Transition>
+
+            <!--Modal Confirma Reserva-->
+            <Transition name="fade">
+                <div v-if="mostrarModalConfirmar" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+                    <div class="bg-white rounded-[35px] w-full max-w-md shadow-2xl p-8 border border-white/50">
+                        <h3 class="text-2xl font-black text-gray-900 uppercase italic mb-6">Confirmar Reserva</h3>
+                        
+                        <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Usuário</span>
+                                <span class="text-xs font-black text-blue-700 uppercase">{{ userName }}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Equipamento</span>
+                                <span class="text-xs font-black text-gray-800 uppercase">{{ reservaAtiva?.nome }}</span>
+                            </div>
+                            <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                                <div class="flex flex-col gap-3">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Período da Reserva</span>
+                                    
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Início</label>
+                                        <input 
+                                            v-model="dataInicioSelecionada" 
+                                            type="datetime-local" 
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Término</label>
+                                        <input 
+                                            v-model="dataFimSelecionada" 
+                                            type="datetime-local" 
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button @click="mostrarModalConfirmar = false" class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl hover:bg-gray-300 transition">Cancelar</button>
+                            <button @click="confirmarReserva" class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+
         </main>
     </div>
 </template>
@@ -125,6 +174,54 @@ import socket from '@/services/socket';
 const userName = ref('Nome');
 const userInitial = ref('A');
 const listaEquipamentos = ref([]);
+
+const mostrarModalConfirmar = ref(false);
+const reservaAtiva = ref(null); 
+const usuarioLogado = ref({}); // Mostrar nome/email no resumo
+
+const dataInicioSelecionada = ref('');
+const dataFimSelecionada = ref('');
+
+// Modal de Realizar Reserva
+const prepararReserva = (equipamento) => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    usuarioLogado.value = userData;
+    
+    const agora = new Date();
+    const umaHoraDepois = new Date(agora.getTime() + 3600000);
+
+    // Formata para o padrão datetime-local  (AAAA-MM-DDTHH:MM)
+    dataInicioSelecionada.value = agora.toISOString().slice(0, 16);
+    dataFimSelecionada.value = umaHoraDepois.toISOString().slice(0, 16);
+
+    reservaAtiva.value = { ...equipamento };
+    mostrarModalConfirmar.value = true;
+};
+
+const confirmarReserva = async () => {
+    // Validação data fim não pode ser antes da início
+    if (new Date(dataFimSelecionada.value) <= new Date(dataInicioSelecionada.value)) {
+        alert("A data de término deve ser posterior à data de início!");
+        return;
+    }
+
+    try {
+        const payload = { 
+            id_equip: reservaAtiva.value.id_equip, 
+            data_inicio: dataInicioSelecionada.value, 
+            data_fim: dataFimSelecionada.value,      
+            observacao: "Reserva realizada pelo painel de controle"
+        };
+
+        await api.post('/reservas/', payload);
+        
+        mostrarModalConfirmar.value = false;
+        await carregarDados();
+        alert("Reserva confirmada!");
+    } catch (e) { 
+        alert("Erro: " + (e.response?.data?.error || "Falha na conexão"));
+    }
+};
 
 // CONTROLE DA MODAL
 const mostrarModalCriar = ref(false);
@@ -173,35 +270,6 @@ const salvarNovoEquipamento = async () => {
         alert("Equipamento cadastrado com sucesso!");
     } catch (e) { 
         alert(e.response?.data?.error || "Erro ao salvar equipamento"); 
-    }
-};
-const fazerReserva = async (id_equip) => {
-    try {
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) return alert("Usuário não identificado.");
-        const user = JSON.parse(storedUser);
-
-        const dataInicio = new Date().toISOString().split('.')[0]; 
-        const dataFim = new Date(Date.now() + 3600000).toISOString().split('.')[0]; 
-
-        const payload = { 
-            id_equip: id_equip, 
-            id_user: user.id_user || user.id_usuario, 
-            data_inicio: dataInicio,
-            data_fim: dataFim,
-            observacao: "Reserva realizada pelo painel de controle"
-        };
-
-        console.log("Enviando para o Back:", payload);
-
-        const response = await api.post('/reservas/', payload);
-        
-        await carregarDados();
-        alert("Reserva realizada com sucesso!");
-    } catch (e) { 
-        const erroMensagem = e.response?.data?.error || "Erro interno no servidor (500)";
-        alert("Erro na reserva: " + erroMensagem);
-        console.error("Traceback do erro:", e.response);
     }
 };
 
