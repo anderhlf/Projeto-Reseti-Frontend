@@ -87,11 +87,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
+import socket from '@/services/socket';
 
-const userName = ref('Anderson Holanda');
+const userName = ref('Nome');
 const userInitial = ref('A');
 const listaEquipamentos = ref([]);
 
@@ -147,9 +148,20 @@ onMounted(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
         const user = JSON.parse(userData);
-        userName.value = user.nome || 'Anderson Holanda';
+        userName.value = user.nome || 'Nome';
         userInitial.value = userName.value.charAt(0).toUpperCase();
     }
     carregarDados();
+
+    socket.on("atualizar_lista", () => {
+        console.log("Recebi o sinal do servidor! Atualizando tabela...");
+        carregarDados();
+    });
+
 });
+onUnmounted(() => {
+    socket.off("atualizar_lista");
+});
+
+
 </script>

@@ -75,31 +75,55 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
+import socket from '@/services/socket';
+import { ref, onMounted, onUnmounted } from 'vue';
 
-const userName = ref('Anderson Holanda');
-const userInitial = ref('A');
+const userName = ref('Carregando...');
+const userInitial = ref('?');
 
-const stats = ref({ os_pendentes: 0, equipamentos_uso: 0, reservas_hoje: 0, atividade: 88 });
-const manutencoes = ref([{ id: 1, nome: 'Servidor Principal - Setor TI', progresso: 75 }, { id: 2, nome: 'Servidor Principal - Setor TI', progresso: 75 }]);
+const stats = ref({ 
+  os_pendentes: 0, 
+  equipamentos_uso: 0, 
+  reservas_hoje: 0, 
+  atividade: 88 
+});
 
-onMounted(async () => {
-  // Carrega Usuário
-  const userData = localStorage.getItem('user');
-  if (userData) {
-    const user = JSON.parse(userData);
-    userName.value = user.nome || 'Anderson Holanda';
-    userInitial.value = userName.value.charAt(0).toUpperCase();
-  }
+const manutencoes = ref([
+  { id: 1, nome: 'Servidor Principal - Setor TI', progresso: 75 }, 
+  { id: 2, nome: 'Servidor Principal - Setor TI', progresso: 75 }
+]);
 
-  // CHAMADA API PADRÃO LOGIN
+const buscarInformacoes = async () => {
   try {
-    const response = await api.get('/equipamentos/'); //TODO Criar essa rota no backend
+    
+    const response = await api.get('/equipamentos/dashboard/stats'); 
     stats.value = response.data;
+    
+    console.log("Dados do Dashboard atualizados via API");
   } catch (error) {
     console.error("Erro ao carregar resumo:", error);
   }
+};
+
+onMounted(async () => {
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    const user = JSON.parse(userData);
+    userName.value = user.nome;
+    userInitial.value = user.nome.charAt(0).toUpperCase();
+  }
+
+  await buscarInformacoes();
+
+  socket.on("atualizar_lista", () => {
+    console.log("Socket: Novas alterações, atualizando");
+    buscarInformacoes();
+  });
+});
+
+onUnmounted(() => {
+  socket.off("atualizar_lista");
 });
 </script>
