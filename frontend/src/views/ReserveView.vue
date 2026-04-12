@@ -50,9 +50,14 @@
                                     </span>
                                 </td>
                                 <td class="py-4 text-center">
-                                    <button @click="fazerReserva(item.id)" :disabled="item.status !== 'DISPONIVEL'"
-                                        :class="item.status === 'DISPONIVEL' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                                        class="text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-md transition">
+                                    <button 
+                                        @click="fazerReserva(item.id)" 
+                                        :disabled="!podeReservar(item.status)"
+                                        :class="podeReservar(item.status) 
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' 
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                        class="text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-md transition"
+                                    >
                                         Realizar Reserva
                                     </button>
                                 </td>
@@ -91,9 +96,31 @@ const userInitial = ref('A');
 const listaEquipamentos = ref([]);
 
 const statusClass = (status) => {
-    if (status === 'DISPONIVEL') return 'bg-green-100 text-green-700 border-green-200';
-    if (status === 'RESERVADO') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    if (!status) return 'bg-red-100 text-red-700 border-red-200';
+    const s = status.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    console.log("Status processado:", s); // TESTE
+
+    if (s === 'DISPONIVEL') {
+        return 'bg-green-100 text-green-700 border-green-200';
+    }
+    
+    if (s === 'RESERVADO') {
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    }
+
+    if (s === 'MANUTENCAO') {
+        return 'bg-orange-100 text-orange-700 border-orange-200';
+    }
+
     return 'bg-red-100 text-red-700 border-red-200';
+};
+
+const podeReservar = (status) => {
+    if (!status) return false;
+    const s = status.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    return s === 'DISPONIVEL';
 };
 
 const carregarDados = async () => {
@@ -107,9 +134,13 @@ const fazerReserva = async (id) => {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         await api.post('/reservas/', { id_equipamento: id, id_usuario: user.id });
-        alert("Reserva feita!");
-        carregarDados();
-    } catch (e) { alert("Erro na reserva"); }
+        
+        await carregarDados(); 
+        
+        alert("Reserva concluída com sucesso!");
+    } catch (e) { 
+        alert("Erro na reserva"); 
+    }
 };
 
 onMounted(() => {
