@@ -113,7 +113,9 @@ const buscarInformacoes = async () => {
 };
 
 onMounted(async () => {
-  const userData = localStorage.getItem('user');
+  const userData = sessionStorage.getItem('user');
+  const user = (userData && userData !== "[object Object]") ? JSON.parse(userData) : {};
+  
   if (userData) {
     const user = JSON.parse(userData);
     userName.value = user.nome;

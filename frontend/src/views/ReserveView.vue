@@ -23,6 +23,9 @@
                     </div>
 
                     <div class="flex gap-3">
+                        <button @click="$router.push('/minhas-reservas')" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                            Minhas Reservas
+                        </button>
                         <button @click="irParaSolicitacoes" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Ver Solicitações
                         </button>
@@ -70,7 +73,6 @@
 
                 <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
                     <button @click="$router.go(-1)" class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Voltar</button>
-                    <button class="bg-blue-800 hover:bg-blue-900 text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Minhas Reservas</button>
                 </div>
             </div>
 
@@ -209,7 +211,7 @@ const equipamentoForm = ref({ id_equip: null, nome: '', numero_serie: '', observ
 
 // Modal de Realizar Reserva
 const prepararReserva = (equipamento) => {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(sessionStorage.getItem('user') || '{}');
     usuarioLogado.value = userData;
     
     const agora = new Date();
@@ -347,7 +349,8 @@ const handleCancelarReserva = async (item) => {
 const fecharModalCriar = () => { mostrarModalCriar.value = false; };
 
 onMounted(() => {
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
+    const user = (userData && userData !== "[object Object]") ? JSON.parse(userData) : {};
     if (userData) {
         const user = JSON.parse(userData);
         userName.value = user.nome || 'Nome';

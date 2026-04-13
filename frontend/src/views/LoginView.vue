@@ -84,11 +84,13 @@
                 email: loginValue.value,
                 senha: password.value
             });
+            // TODO Teste
+            console.log("Dados recebidos do servidor:", response.data.user);
 
             if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('user', JSON.stringify(response.data.user)); 
-                
+                sessionStorage.setItem('user', JSON.stringify(response.data.user)); 
+                sessionStorage.setItem('token', response.data.token);
+
                 notify('Bem-vindo!', 'Login realizado com sucesso', 'success');
                 router.push('/dashboard');
             }

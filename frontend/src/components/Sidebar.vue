@@ -47,5 +47,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
 const router = useRouter();
-const handleLogout = () => { localStorage.clear(); router.push('/'); };
+const handleLogout = () => {
+    sessionStorage.clear(); 
+    router.push('/');
+};
 </script>

@@ -34,7 +34,8 @@ import { ref, onMounted } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 const userName = ref(''); const userInitial = ref('');
 onMounted(() => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const userRaw = sessionStorage.getItem('user');
+  const user = userRaw && userRaw !== "[object Object]" ? JSON.parse(userRaw) : {};
   if (user) { userName.value = user.nome; userInitial.value = userName.value.charAt(0).toUpperCase(); }
 });
 </script>

@@ -42,6 +42,21 @@ const router = createRouter({
       name: "reserva",
       component: ReserveView,
     },
+    {
+      path: '/minhas-reservas',
+      name: 'MinhasReservas',
+      component: () => import('@/views/MinhasReservas.vue')
+    },
+    {
+      path: "/abertura-os",
+      name: "AberturaOS",
+      component: () => import('../views/AberturaOSView.vue') 
+    },
+    {
+      path: "/usuarios",
+      name: "GerenciadorUsuario",
+      component: () => import('../views/UserManagementView.vue')
+    },
   ],
 });
 
