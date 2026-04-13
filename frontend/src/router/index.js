@@ -25,6 +25,11 @@ const router = createRouter({
       name: "forgot-password",
       component: ForgotPasswordView,
     },
+    {
+      path: '/reset-senha/:token',
+      name: 'ResetSenha',
+      component: () => import('../views/ResetSenha.vue')
+    },
 // PASSO 3: Registrar a rota do Dashboard para quando você logar
     {
       path: "/dashboard",

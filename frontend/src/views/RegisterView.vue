@@ -66,6 +66,7 @@
 import { ref } from 'vue';
 import api from '@/services/api'; 
 import { useRouter } from 'vue-router';
+import { notify } from '@/utils/notificacoes';
 
 const nome = ref('');
 const email = ref('');
@@ -85,12 +86,12 @@ const handleRegister = async () => {
         });
 
         if (response.status === 201) {
-            alert('Conta criada com sucesso!');
+            notify('Sucesso!', 'Conta criada com sucesso!', 'success');
             router.push('/'); 
         }
     } catch (error) {
         console.error('Erro no cadastro:', error);
-        alert(error.response?.data?.error || 'Erro ao criar conta.');
+        notify('Erro no Cadastro', error.response?.data?.error || 'Falha ao criar conta', 'error');
     }
 };
 </script>

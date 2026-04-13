@@ -170,6 +170,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
 import socket from '@/services/socket';
+import { notify } from '@/utils/notificacoes';
 
 const userName = ref('Nome');
 const userInitial = ref('A');
@@ -201,7 +202,7 @@ const prepararReserva = (equipamento) => {
 const confirmarReserva = async () => {
     // Validação data fim não pode ser antes da início
     if (new Date(dataFimSelecionada.value) <= new Date(dataInicioSelecionada.value)) {
-        alert("A data de término deve ser posterior à data de início!");
+        notify('Atenção', 'A data de término deve ser posterior à de início!', 'warning');
         return;
     }
 
@@ -217,9 +218,9 @@ const confirmarReserva = async () => {
         
         mostrarModalConfirmar.value = false;
         await carregarDados();
-        alert("Reserva confirmada!");
+        notify('Reservado!', 'Sua reserva foi confirmada com sucesso.', 'success');
     } catch (e) { 
-        alert("Erro: " + (e.response?.data?.error || "Falha na conexão"));
+        notify('Erro na Reserva', e.response?.data?.error || 'Falha na conexão', 'error');
     }
 };
 
@@ -267,9 +268,9 @@ const salvarNovoEquipamento = async () => {
         await api.post('/equipamentos/', novoEquipamento.value);
         fecharModalCriar();
         await carregarDados(); 
-        alert("Equipamento cadastrado com sucesso!");
+        notify('Cadastrado', 'Seu Equipamento foi criado com sucesso.', 'success');
     } catch (e) { 
-        alert(e.response?.data?.error || "Erro ao salvar equipamento"); 
+        notify('Erro ao salvar equipamento', e.response?.data?.error || 'Falha na conexão', 'error');
     }
 };
 

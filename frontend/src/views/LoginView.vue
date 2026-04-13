@@ -70,6 +70,7 @@
     import { ref } from 'vue';
     import api from '@/services/api'; // TODO Importante* Conecta em outras View ou componenetes essa importação
     import { useRouter } from 'vue-router';
+    import { notify } from '@/utils/notificacoes';
 
     const loginValue = ref('');
     const password = ref('');
@@ -78,7 +79,7 @@
 
     const handleLogin = async () => {
         try {
-            // TODO Importante* Aqui você so precisa passar a ROTA do Backend Prefixo (Ex:. /auth) + ROTA (/login)
+            
             const response = await api.post('/auth/login', {
                 email: loginValue.value,
                 senha: password.value
@@ -88,11 +89,12 @@
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user)); 
                 
+                notify('Bem-vindo!', 'Login realizado com sucesso', 'success');
                 router.push('/dashboard');
             }
         } catch (error) {
             console.error('Erro no login:', error);
-            alert(error.response?.data?.error || 'Erro ao conectar com o servidor.');
+            notify('Erro no Login', error.response?.data?.error || 'Credenciais inválidas', 'error');
         }
     };
 </script>

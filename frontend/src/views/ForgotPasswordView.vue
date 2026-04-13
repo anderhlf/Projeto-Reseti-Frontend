@@ -57,18 +57,33 @@
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
+import api from '@/services/api'; 
+import { useRouter } from 'vue-router';
+import { notify } from '@/utils/notificacoes';
 
 const email = ref('');
+const loading = ref(false);
+const router = useRouter();
 
 const handleReset = async () => {
+    if (!email.value) return;
+    
+    loading.value = true;
     try {
-        // Rota que você deve ter no seu servidor Flask
-        console.log('Solicitando redefinição para:', email.value);
-        alert('Se este e-mail estiver em nossa base, você receberá um link em instantes!');
+        
+        const response = await api.post('/auth/reset-senha', { 
+            email: email.value 
+        });
+
+        notify('AVISO!', 'E-mail de recuperação enviado!', 'success');
+        
+        router.push('/'); 
+        
     } catch (error) {
         console.error('Erro na solicitação:', error);
-        alert('Erro ao processar solicitação. Tente novamente mais tarde.');
+        notify('AVISO!', error.response?.data?.error || 'Erro ao processar solicitação', 'error');
+    } finally {
+        loading.value = false;
     }
 };
 </script>
