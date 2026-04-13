@@ -51,8 +51,16 @@
                                 </td>
                                 <td class="py-4 text-center pr-6">
                                     <div class="flex justify-center gap-2">
-                                        <button class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">Edit</button>
-                                        <button class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">Cancelar</button>
+                                        <button @click="abrirModalEditar(item)" 
+                                            class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
+                                        Editar Equipamento
+                                        </button>
+                                        <button 
+                                            v-if="item.status === 'Reservado'"
+                                            @click="handleCancelarReserva(item)" 
+                                            class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
+                                        Cancelar Reserva
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -71,44 +79,56 @@
                     <div class="bg-white/95 backdrop-blur-2xl rounded-[40px] border border-white/50 w-full max-w-lg shadow-2xl p-10 transform transition-all">
                         
                         <div class="mb-8">
-                            <h3 class="text-2xl font-black text-gray-950 uppercase tracking-tighter italic">Novo Equipamento</h3>
+                            <h3 class="text-2xl font-black text-gray-950 uppercase tracking-tighter italic">
+    {{ isEditing ? 'Editar Equipamento' : 'Novo Equipamento' }}
+</h3>
                             <div class="h-1.5 w-16 bg-blue-600 mt-2 rounded-full"></div>
                         </div>
 
-                        <form @submit.prevent="salvarNovoEquipamento" class="space-y-5">
+                        <form @submit.prevent="salvarEquipamento" class="space-y-5">
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Nome Equipamento</label>
-                                <input v-model="novoEquipamento.nome" type="text" placeholder="Ex: Notebook Dell" required
+                                <input v-model="equipamentoForm.nome" type="text" placeholder="Ex: Notebook Dell" required
                                     class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
                             </div>
 
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Número de Série</label>
-                                <input v-model="novoEquipamento.numero_serie" type="text" placeholder="Ex: SN-998877" required
+                                <input v-model="equipamentoForm.numero_serie" type="text" placeholder="Ex: SN-998877" required
                                     class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
                             </div>
 
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Observação</label>
-                                <textarea v-model="novoEquipamento.observacao" placeholder="Detalhes adicionais..." rows="2"
+                                <textarea v-model="equipamentoForm.observacao" placeholder="Detalhes adicionais..." rows="2"
                                     class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition resize-none"></textarea>
                             </div>
 
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Status: Select</label>
-                                <select v-model="novoEquipamento.status" required
+                                <select v-model="equipamentoForm.status" required
                                     class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition appearance-none">
                                     <option value="Disponível">DISPONÍVEL</option>
                                     <option value="Manutenção">MANUTENÇÃO</option>
-                                    <option value="Reservado">RESERVADO</option>
+                                    <option value="Reservado" :disabled="!isEditing">RESERVADO</option>
                                 </select>
                             </div>
 
+                            <div v-if="isEditing" class="pt-2 text-center">
+                                <button type="button" @click="removerEquipamento" 
+                                    class="text-red-500 text-[10px] font-black uppercase hover:underline">
+                                    Remover este equipamento permanentemente
+                                </button>
+                            </div>
+
                             <div class="flex gap-4 pt-6">
-                                <button @click="fecharModalCriar" type="button" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-black uppercase py-4 rounded-2xl transition active:scale-95">Cancelar</button>
-                                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 font-black uppercase py-4 rounded-2xl shadow-lg transition active:scale-95">Confirmar</button>
+                                <button @click="fecharModalCriar" type="button" class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl">Cancelar</button>
+                                <button type="submit" class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg">
+                                    {{ isEditing ? 'Salvar Alterações' : 'Confirmar' }}
+                                </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </Transition>
@@ -183,6 +203,10 @@ const usuarioLogado = ref({}); // Mostrar nome/email no resumo
 const dataInicioSelecionada = ref('');
 const dataFimSelecionada = ref('');
 
+// Constante para tarbalahr com o estado de Editar e Remover
+const isEditing = ref(false); // Define se o modal é para Edição ou Criação
+const equipamentoForm = ref({ id_equip: null, nome: '', numero_serie: '', observacao: '', status: 'Disponível' });
+
 // Modal de Realizar Reserva
 const prepararReserva = (equipamento) => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -226,12 +250,6 @@ const confirmarReserva = async () => {
 
 // CONTROLE DA MODAL
 const mostrarModalCriar = ref(false);
-const novoEquipamento = ref({ 
-    nome: '', 
-    numero_serie: '', 
-    observacao: '', 
-    status: 'Disponível' 
-});
 
 const statusClass = (status) => {
     if (!status) return 'bg-red-100 text-red-700 border-red-200';
@@ -256,23 +274,77 @@ const carregarDados = async () => {
 };
 
 const abrirModalCriar = () => {
-    novoEquipamento.value = { nome: '', numero_serie: '', observacao: '', status: 'Disponível' };
+    isEditing.value = false;
+    equipamentoForm.value = { id_equip: null, nome: '', numero_serie: '', observacao: '', status: 'Disponível' };
     mostrarModalCriar.value = true;
 };
 
-const fecharModalCriar = () => { mostrarModalCriar.value = false; };
+const abrirModalEditar = (item) => {
+    isEditing.value = true;
+    // Criamos uma cópia para não editar direto na tabela!!
+    equipamentoForm.value = { ...item }; 
+    mostrarModalCriar.value = true;
+};
 
-const salvarNovoEquipamento = async () => {
+const salvarEquipamento = async () => {
     try {
-        // Envia campos compatíveis com data.get() do Python
-        await api.post('/equipamentos/', novoEquipamento.value);
+        if (isEditing.value) {
+            await api.put(`/equipamentos/${equipamentoForm.value.id_equip}`, equipamentoForm.value);
+            notify('Atualizado', 'Equipamento atualizado com sucesso!', 'success');
+        } else {
+            await api.post('/equipamentos/', equipamentoForm.value);
+            notify('Cadastrado', 'Novo equipamento adicionado!', 'success');
+        }
         fecharModalCriar();
-        await carregarDados(); 
-        notify('Cadastrado', 'Seu Equipamento foi criado com sucesso.', 'success');
-    } catch (e) { 
-        notify('Erro ao salvar equipamento', e.response?.data?.error || 'Falha na conexão', 'error');
+        await carregarDados();
+    } catch (e) {
+        notify('Erro', e.response?.data?.error || 'Falha na operação', 'error');
     }
 };
+
+// REMOVER Equipamento
+const removerEquipamento = async () => {
+    const confirmacao = await notify(
+        'Tem certeza?', 
+        'Isso excluirá o equipamento permanentemente!', 
+        'warning'
+    );
+    
+    if (confirmacao.isConfirmed) {
+        try {
+            await api.delete(`/equipamentos/${equipamentoForm.value.id_equip}`);
+            fecharModalCriar();
+            await carregarDados();
+            notify('Removido', 'Equipamento excluído.', 'success');
+        } catch (e) {
+            notify('Erro', 'Não foi possível remover.', 'error');
+        }
+    }
+};
+
+// CANCECLAR Reserva
+const handleCancelarReserva = async (item) => {
+    const confirmacao = await notify(
+        'Cancelar Reserva?',
+        `Deseja realmente liberar o equipamento: ${item.nome}?`,
+        'warning'
+    );
+
+    if (confirmacao.isConfirmed) {
+        try {
+            
+            await api.delete(`/reservas/${item.id_reserva_ativa}`);
+            
+            await carregarDados();
+            notify('Sucesso', 'Reserva cancelada e equipamento liberado!', 'success');
+        } catch (e) {
+            notify('Erro', 'Não foi possível cancelar a reserva.', 'error');
+            console.error(e);
+        }
+    }
+};
+
+const fecharModalCriar = () => { mostrarModalCriar.value = false; };
 
 onMounted(() => {
     const userData = localStorage.getItem('user');
