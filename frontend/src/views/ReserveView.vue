@@ -23,16 +23,22 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button @click="$router.push('/minhas-reservas')" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                        <button @click="$router.push('/minhas-reservas')" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Minhas Reservas
                         </button>
-                        <button @click="irParaSolicitacoes" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                        
+                        <button v-if="user?.permissao === 'Adm'" @click="irParaSolicitacoes" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Ver Solicitações
                         </button>
-                        <button @click="abrirModalCriar" class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                        
+                        <button v-if="user?.permissao === 'Adm'" @click="abrirModalCriar" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Criar Equipamento
                         </button>
                     </div>
+
                 </div>
 
                 <div class="overflow-x-auto flex-1">
@@ -54,15 +60,14 @@
                                 </td>
                                 <td class="py-4 text-center pr-6">
                                     <div class="flex justify-center gap-2">
-                                        <button @click="abrirModalEditar(item)" 
+                                        <button v-if="user?.permissao === 'Adm'" @click="abrirModalEditar(item)" 
                                             class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
-                                        Editar Equipamento
+                                            Editar Equipamento
                                         </button>
-                                        <button 
-                                            v-if="item.status === 'Reservado'"
-                                            @click="handleCancelarReserva(item)" 
+
+                                        <button v-if="item.status === 'Reservado'" @click="handleCancelarReserva(item)" 
                                             class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
-                                        Cancelar Reserva
+                                            Cancelar Reserva
                                         </button>
                                     </div>
                                 </td>
@@ -201,6 +206,8 @@ const listaEquipamentos = ref([]);
 const mostrarModalConfirmar = ref(false);
 const reservaAtiva = ref(null); 
 const usuarioLogado = ref({}); // Mostrar nome/email no resumo
+
+const user = ref({});
 
 const dataInicioSelecionada = ref('');
 const dataFimSelecionada = ref('');
@@ -358,6 +365,16 @@ onMounted(() => {
     }
     carregarDados();
     socket.on("atualizar_lista", carregarDados);
+});
+
+onMounted(() => {
+    const userData = sessionStorage.getItem('user');
+    if (userData && userData !== "[object Object]") {
+        user.value = JSON.parse(userData);
+    } else {
+        
+        router.push('/');
+    }
 });
 
 onUnmounted(() => { socket.off("atualizar_lista"); });

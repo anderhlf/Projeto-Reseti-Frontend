@@ -3,7 +3,6 @@ import LoginView from "../views/LoginView.vue";
 import RegisterView from "../views/RegisterView.vue";
 import ForgotPasswordView from "../views/ForgotPasswordView.vue";
 import DashboardView from "../views/DashboardView.vue";
-// PASSO 1: Importar a tela de reserva que criamos
 import ReserveView from "../views/ReserveView.vue"; 
 
 const router = createRouter({
@@ -19,7 +18,6 @@ const router = createRouter({
       name: "register",
       component: RegisterView,
     },
-// PASSO 2: Registrar a rota de redefinição
     {
       path: "/redefinir-senha",
       name: "forgot-password",
@@ -30,34 +28,59 @@ const router = createRouter({
       name: 'ResetSenha',
       component: () => import('../views/ResetSenha.vue')
     },
-// PASSO 3: Registrar a rota do Dashboard para quando você logar
     {
       path: "/dashboard",
       name: "dashboard",
       component: DashboardView,
+      meta: { requiresAuth: true }
     },
-// PASSO NOVO: Registrar a rota da Reserva para o botão funcionar
     {
       path: "/reserva",
       name: "reserva",
       component: ReserveView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/minhas-reservas',
       name: 'MinhasReservas',
-      component: () => import('@/views/MinhasReservas.vue')
+      component: () => import('@/views/MinhasReservas.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: "/abertura-os",
       name: "AberturaOS",
-      component: () => import('../views/AberturaOSView.vue') 
+      component: () => import('../views/AberturaOSView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: "/usuarios",
       name: "GerenciadorUsuario",
-      component: () => import('../views/UserManagementView.vue')
+      component: () => import('../views/UserManagementView.vue'),
+      meta: { requiresAdmin: true }
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const loggedIn = sessionStorage.getItem('user') // Verifica se existe usuário logado
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next('/')
+  } else {
+    next()
+  }
+})
+
+router.beforeEach((to, from, next) => {
+  const userData = sessionStorage.getItem('user');
+  const user = userData && userData !== "[object Object]" ? JSON.parse(userData) : null;
+
+  if (to.path === '/usuarios' && user?.permissao !== 'Adm') {
+    // Se tentar entrar em usuários sem ser Adm, manda pro Dashboard
+    next('/dashboard');
+  } else {
+    next();
+  }
 });
 
 export default router;
