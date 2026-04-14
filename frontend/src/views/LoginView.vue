@@ -13,9 +13,10 @@
 
                 <div class="space-y-1">
                     <label class="block text-sm font-semibold text-gray-700 ml-3">Usuário ou E-mail</label>
-                    <input v-model="loginValue" type="text" placeholder="Digite seu usuário ou e-mail"
+                    <input v-model="loginValue" @blur="processarEmail" type="text" placeholder="Digite seu usuário ou e-mail"
                         class="w-full p-4 rounded-full bg-white/60 border border-gray-200 outline-none shadow-inner focus:ring-2 focus:ring-blue-300 transition"
                         required />
+                        <p v-if="emailInvalido" class="text-red-500 text-[10px] ml-4 mt-1 font-bold">Formato de e-mail inválido</p>
                 </div>
 
                 <div class="space-y-1">
@@ -71,11 +72,32 @@
     import api from '@/services/api'; // TODO Importante* Conecta em outras View ou componenetes essa importação
     import { useRouter } from 'vue-router';
     import { notify } from '@/utils/notificacoes';
+    import { validarEmailBasico } from '@/utils/validador';
 
     const loginValue = ref('');
     const password = ref('');
     const showPassword = ref(false);
     const router = useRouter();
+
+    const email = ref(''); 
+    const emailInvalido = ref(false);
+
+    // TODO Ajustar a formatação do E-mail
+    const processarEmail = () => {
+        if (!loginValue.value.includes('@')) {
+            emailInvalido.value = false;
+            return;
+        }
+
+        const { valido, formatado } = validarEmailBasico(loginValue.value);
+        
+        loginValue.value = formatado; 
+        emailInvalido.value = !valido;
+
+        if (!valido) {
+            notify('Atenção', 'O formato do e-mail parece incorreto.', 'warning');
+        }
+    };
 
     const handleLogin = async () => {
         try {
