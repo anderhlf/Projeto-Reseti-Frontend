@@ -40,7 +40,7 @@
                     </div>
 
                 </div>
-
+                
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-separate border-spacing-y-3">
                         <tbody>
@@ -64,10 +64,13 @@
                                             class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
                                             Editar Equipamento
                                         </button>
-
-                                        <button v-if="item.status === 'Reservado'" @click="handleCancelarReserva(item)" 
-                                            class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
-                                            Cancelar Reserva
+                                        
+                                        <button 
+                                        v-if="item.status === 'Reservado' && (user?.id == item.id_usuario_reserva || user?.permissao === 'Adm')" 
+                                        @click="handleCancelarReserva(item)" 
+                                        class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition"
+                                        >
+                                        Cancelar Reserva
                                         </button>
                                     </div>
                                 </td>
@@ -198,6 +201,7 @@ import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
 import socket from '@/services/socket';
 import { notify } from '@/utils/notificacoes';
+import { useRouter } from 'vue-router';
 
 const userName = ref('Nome');
 const userInitial = ref('A');
@@ -207,7 +211,7 @@ const mostrarModalConfirmar = ref(false);
 const reservaAtiva = ref(null); 
 const usuarioLogado = ref({}); // Mostrar nome/email no resumo
 
-const user = ref({});
+const user = ref(null);
 
 const dataInicioSelecionada = ref('');
 const dataFimSelecionada = ref('');
@@ -280,7 +284,7 @@ const carregarDados = async () => {
         const response = await api.get('/equipamentos/');
         listaEquipamentos.value = response.data;
     } catch (e) { console.error("Erro Front carregarDados:", e); }
-};
+}; 
 
 const abrirModalCriar = () => {
     isEditing.value = false;
@@ -354,30 +358,30 @@ const handleCancelarReserva = async (item) => {
 };
 
 const fecharModalCriar = () => { mostrarModalCriar.value = false; };
-
+ 
 onMounted(() => {
     const userData = sessionStorage.getItem('user');
-    const user = (userData && userData !== "[object Object]") ? JSON.parse(userData) : {};
-    if (userData) {
-        const user = JSON.parse(userData);
-        userName.value = user.nome || 'Nome';
+    
+    if (userData && userData !== "[object Object]") {
+        const parsedUser = JSON.parse(userData);
+        
+        user.value = parsedUser;
+        
+        userName.value = parsedUser.nome || 'Nome';
         userInitial.value = userName.value.charAt(0).toUpperCase();
+        
+        console.log("Sistema identificou seu ID como:", user.value.id);
+    } else {
+        console.error("Erro: Usuário não encontrado no sessionStorage!");
+        router.push('/'); 
     }
+
     carregarDados();
     socket.on("atualizar_lista", carregarDados);
 });
 
-onMounted(() => {
-    const userData = sessionStorage.getItem('user');
-    if (userData && userData !== "[object Object]") {
-        user.value = JSON.parse(userData);
-    } else {
-        
-        router.push('/');
-    }
-});
-
 onUnmounted(() => { socket.off("atualizar_lista"); });
+
 
 </script>
 
