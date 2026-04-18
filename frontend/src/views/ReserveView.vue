@@ -120,7 +120,7 @@
                     </tbody>
                 </table>
             </div>
-
+            <!--VOLTAR + PAGINAÇÃO-->
             <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
                 <button @click="$router.go(-1)"
                     class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">
@@ -507,8 +507,6 @@ const filteredEquipamentos = computed(() => {
 watch([searchQuery, statusFilter], () => {
     currentPage.value = 1;
 });
-
-
 
 </script>
 
