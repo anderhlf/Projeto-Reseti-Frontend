@@ -7,196 +7,269 @@
         <main class="flex-1 p-8 overflow-x-hidden flex flex-col text-gray-800 relative">
 
             <header class="flex justify-end items-center mb-6">
-                <div class="flex items-center gap-4 bg-white/90 p-1.5 rounded-full border border-white/50 pr-8 shadow-xl">
-                    <div class="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-md uppercase">
+                <div
+                    class="flex items-center gap-4 bg-white/90 p-1.5 rounded-full border border-white/50 pr-8 shadow-xl">
+                    <div
+                        class="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-md uppercase">
                         {{ userInitial }}
                     </div>
                     <span class="font-black text-sm text-gray-800 uppercase tracking-tighter">{{ userName }}</span>
                 </div>
             </header>
 
-            <div class="bg-white/80 backdrop-blur-xl rounded-[35px] border border-white/50 p-8 shadow-xl flex-1 flex flex-col">
-                <div class="flex justify-between items-center mb-8">
+            <div
+                class="bg-white/80 backdrop-blur-xl rounded-[35px] border border-white/50 p-8 shadow-xl flex-1 flex flex-col">
+                <<div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-gray-900 uppercase tracking-tighter italic">Área de Reserva</h2>
-                        <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Tabelas dos Equipamentos</p>
+                        <h2 class="text-3xl font-black text-gray-900 uppercase tracking-tighter italic">Área de Reserva
+                        </h2>
+                        <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Tabelas dos
+                            Equipamentos</p>
                     </div>
 
                     <div class="flex gap-3">
-                        <button @click="$router.push('/minhas-reservas')" 
+                        <button @click="$router.push('/minhas-reservas')"
                             class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Minhas Reservas
                         </button>
-                        
-                        <button v-if="user?.permissao === 'Adm'" @click="irParaSolicitacoes" 
+
+                        <button v-if="user?.permissao === 'Adm'" @click="irParaSolicitacoes"
                             class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Ver Solicitações
                         </button>
-                        
-                        <button v-if="user?.permissao === 'Adm'" @click="abrirModalCriar" 
+
+                        <button v-if="user?.permissao === 'Adm'" @click="abrirModalCriar"
                             class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Criar Equipamento
                         </button>
                     </div>
+            </div>
 
-                </div>
-                
-                <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-left border-separate border-spacing-y-3">
-                        <tbody>
-                            <tr v-for="item in listaEquipamentos" :key="item.id_equip" class="bg-white/40 hover:bg-white/60 transition-colors shadow-sm rounded-2xl">
-                                <td class="py-4 pl-6 font-bold text-gray-800 uppercase text-xs">{{ item.nome }}</td>
-                                <td class="py-4 text-center">
-                                    <span :class="statusClass(item.status)" class="px-4 py-1.5 rounded-full text-[9px] font-black border uppercase">
-                                        {{ item.status }}
-                                    </span>
-                                </td>
-                                <td class="py-4 text-center">
-                                    <button @click="prepararReserva(item)" :disabled="!podeReservar(item.status)"
-                                        :class="podeReservar(item.status) ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                                        class="text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-md transition active:scale-95">
-                                        Realizar Reserva
-                                    </button>
-                                </td>
-                                <td class="py-4 text-center pr-6">
-                                    <div class="flex justify-center gap-2">
-                                        <button v-if="user?.permissao === 'Adm'" @click="abrirModalEditar(item)" 
-                                            class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
-                                            Editar Equipamento
-                                        </button>
-                                        
-                                        <button 
-                                        v-if="item.status === 'Reservado' && (user?.id == item.id_usuario_reserva || user?.permissao === 'Adm')" 
-                                        @click="handleCancelarReserva(item)" 
-                                        class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition"
-                                        >
-                                        Cancelar Reserva
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="flex items-center gap-6 mb-8 px-4 py-3 border-b-2 border-blue-600/20">
+
+                <span class="text-xs font-black text-blue-700 uppercase tracking-tighter italic">NOME</span>
+
+                <div class="relative min-w-[160px]">
+                    <select v-model="statusFilter"
+                        class="w-full bg-white/50 border-2 border-blue-600/20 rounded-lg px-4 py-1.5 text-[10px] font-black uppercase outline-none focus:border-blue-600 transition appearance-none cursor-pointer">
+                        <option value="">STATUS</option>
+                        <option value="Disponível">DISPONÍVEL</option>
+                        <option value="Reservado">RESERVADO</option>
+                        <option value="Manutenção">MANUTENÇÃO</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                        <svg class="h-3 w-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </div>
 
-                <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
-                    <button @click="$router.go(-1)" class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Voltar</button>
+                <div class="flex-1 flex items-center gap-4">
+                    <label class="text-[10px] font-black text-blue-700 uppercase tracking-widest">BUSCAR</label>
+                    <div class="relative flex-1 max-w-md">
+                        <input v-model="searchQuery" type="text" placeholder="Digite o nome ou modelo..."
+                            class="w-full bg-transparent border-b-2 border-blue-600/30 focus:border-blue-600 px-2 py-1 text-xs font-bold outline-none transition" />
+
+                        <span class="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <Transition name="fade">
-                <div v-if="mostrarModalCriar" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 text-left">
-                    <div class="bg-white/95 backdrop-blur-2xl rounded-[40px] border border-white/50 w-full max-w-lg shadow-2xl p-10 transform transition-all">
-                        
-                        <div class="mb-8">
-                            <h3 class="text-2xl font-black text-gray-950 uppercase tracking-tighter italic">
-    {{ isEditing ? 'Editar Equipamento' : 'Novo Equipamento' }}
-</h3>
-                            <div class="h-1.5 w-16 bg-blue-600 mt-2 rounded-full"></div>
-                        </div>
 
-                        <form @submit.prevent="salvarEquipamento" class="space-y-5">
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Nome Equipamento</label>
-                                <input v-model="equipamentoForm.nome" type="text" placeholder="Ex: Notebook Dell" required
-                                    class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Número de Série</label>
-                                <input v-model="equipamentoForm.numero_serie" type="text" placeholder="Ex: SN-998877" required
-                                    class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Observação</label>
-                                <textarea v-model="equipamentoForm.observacao" placeholder="Detalhes adicionais..." rows="2"
-                                    class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition resize-none"></textarea>
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Status: Select</label>
-                                <select v-model="equipamentoForm.status" required
-                                    class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition appearance-none">
-                                    <option value="Disponível">DISPONÍVEL</option>
-                                    <option value="Manutenção">MANUTENÇÃO</option>
-                                    <option value="Reservado" :disabled="!isEditing">RESERVADO</option>
-                                </select>
-                            </div>
-
-                            <div v-if="isEditing" class="pt-2 text-center">
-                                <button type="button" @click="removerEquipamento" 
-                                    class="text-red-500 text-[10px] font-black uppercase hover:underline">
-                                    Remover este equipamento permanentemente
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-separate border-spacing-y-3">
+                    <tbody>
+                        <tr v-for="item in paginatedEquipamentos" :key="item.id_equip"
+                            class="bg-white/40 hover:bg-white/60 transition-colors shadow-sm rounded-2xl">
+                            <td class="py-4 pl-6 font-bold text-gray-800 uppercase text-xs">{{ item.nome }}</td>
+                            <td class="py-4 text-center">
+                                <span :class="statusClass(item.status)"
+                                    class="px-4 py-1.5 rounded-full text-[9px] font-black border uppercase">
+                                    {{ item.status }}
+                                </span>
+                            </td>
+                            <td class="py-4 text-center">
+                                <button @click="prepararReserva(item)" :disabled="!podeReservar(item.status)"
+                                    :class="podeReservar(item.status) ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                    class="text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-md transition active:scale-95">
+                                    Realizar Reserva
                                 </button>
-                            </div>
+                            </td>
+                            <td class="py-4 text-center pr-6">
+                                <div class="flex justify-center gap-2">
+                                    <button v-if="user?.permissao === 'Adm'" @click="abrirModalEditar(item)"
+                                        class="text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
+                                        Editar Equipamento
+                                    </button>
 
-                            <div class="flex gap-4 pt-6">
-                                <button @click="fecharModalCriar" type="button" class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl">Cancelar</button>
-                                <button type="submit" class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg">
-                                    {{ isEditing ? 'Salvar Alterações' : 'Confirmar' }}
-                                </button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </Transition>
-
-            <!--Modal Confirma Reserva-->
-            <Transition name="fade">
-                <div v-if="mostrarModalConfirmar" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
-                    <div class="bg-white rounded-[35px] w-full max-w-md shadow-2xl p-8 border border-white/50">
-                        <h3 class="text-2xl font-black text-gray-900 uppercase italic mb-6">Confirmar Reserva</h3>
-                        
-                        <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                            <div class="flex justify-between border-b pb-2">
-                                <span class="text-[10px] font-bold text-gray-500 uppercase">Usuário</span>
-                                <span class="text-xs font-black text-blue-700 uppercase">{{ userName }}</span>
-                            </div>
-                            <div class="flex justify-between border-b pb-2">
-                                <span class="text-[10px] font-bold text-gray-500 uppercase">Equipamento</span>
-                                <span class="text-xs font-black text-gray-800 uppercase">{{ reservaAtiva?.nome }}</span>
-                            </div>
-                            <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                <div class="flex flex-col gap-3">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Período da Reserva</span>
-                                    
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Início</label>
-                                        <input 
-                                            v-model="dataInicioSelecionada" 
-                                            type="datetime-local" 
-                                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition"
-                                        />
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Término</label>
-                                        <input 
-                                            v-model="dataFimSelecionada" 
-                                            type="datetime-local" 
-                                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition"
-                                        />
-                                    </div>
+                                    <button
+                                        v-if="item.status === 'Reservado' && (user?.id == item.id_usuario_reserva || user?.permissao === 'Adm')"
+                                        @click="handleCancelarReserva(item)"
+                                        class="text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition">
+                                        Cancelar Reserva
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-                        <div class="flex gap-4">
-                            <button @click="mostrarModalConfirmar = false" class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl hover:bg-gray-300 transition">Cancelar</button>
-                            <button @click="confirmarReserva" class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition">Confirmar</button>
+            <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
+                <button @click="$router.go(-1)"
+                    class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">
+                    Voltar
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <button @click="prevPage" :disabled="currentPage === 1" type="button"
+                        class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">
+                        Página {{ currentPage }} de {{ totalPages }}
+                    </span>
+
+                    <button @click="nextPage" :disabled="currentPage === totalPages" type="button"
+                        class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+    </div>
+
+    <Transition name="fade">
+        <div v-if="mostrarModalCriar"
+            class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 text-left">
+            <div
+                class="bg-white/95 backdrop-blur-2xl rounded-[40px] border border-white/50 w-full max-w-lg shadow-2xl p-10 transform transition-all">
+
+                <div class="mb-8">
+                    <h3 class="text-2xl font-black text-gray-950 uppercase tracking-tighter italic">
+                        {{ isEditing ? 'Editar Equipamento' : 'Novo Equipamento' }}
+                    </h3>
+                    <div class="h-1.5 w-16 bg-blue-600 mt-2 rounded-full"></div>
+                </div>
+
+                <form @submit.prevent="salvarEquipamento" class="space-y-5">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Nome
+                            Equipamento</label>
+                        <input v-model="equipamentoForm.nome" type="text" placeholder="Ex: Notebook Dell" required
+                            class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Número de
+                            Série</label>
+                        <input v-model="equipamentoForm.numero_serie" type="text" placeholder="Ex: SN-998877" required
+                            class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label
+                            class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Observação</label>
+                        <textarea v-model="equipamentoForm.observacao" placeholder="Detalhes adicionais..." rows="2"
+                            class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition resize-none"></textarea>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">Status:
+                            Select</label>
+                        <select v-model="equipamentoForm.status" required
+                            class="w-full bg-white border border-gray-200 focus:border-purple-500 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none transition appearance-none">
+                            <option value="Disponível">DISPONÍVEL</option>
+                            <option value="Manutenção">MANUTENÇÃO</option>
+                            <option value="Reservado" :disabled="!isEditing">RESERVADO</option>
+                        </select>
+                    </div>
+
+                    <div v-if="isEditing" class="pt-2 text-center">
+                        <button type="button" @click="removerEquipamento"
+                            class="text-red-500 text-[10px] font-black uppercase hover:underline">
+                            Remover este equipamento permanentemente
+                        </button>
+                    </div>
+
+                    <div class="flex gap-4 pt-6">
+                        <button @click="fecharModalCriar" type="button"
+                            class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl">Cancelar</button>
+                        <button type="submit"
+                            class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg">
+                            {{ isEditing ? 'Salvar Alterações' : 'Confirmar' }}
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </Transition>
+
+    <!--Modal Confirma Reserva-->
+    <Transition name="fade">
+        <div v-if="mostrarModalConfirmar"
+            class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+            <div class="bg-white rounded-[35px] w-full max-w-md shadow-2xl p-8 border border-white/50">
+                <h3 class="text-2xl font-black text-gray-900 uppercase italic mb-6">Confirmar Reserva</h3>
+
+                <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase">Usuário</span>
+                        <span class="text-xs font-black text-blue-700 uppercase">{{ userName }}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase">Equipamento</span>
+                        <span class="text-xs font-black text-gray-800 uppercase">{{ reservaAtiva?.nome }}</span>
+                    </div>
+                    <div class="space-y-4 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                        <div class="flex flex-col gap-3">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Período da
+                                Reserva</span>
+
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Início</label>
+                                <input v-model="dataInicioSelecionada" type="datetime-local"
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-blue-600 uppercase ml-1">Término</label>
+                                <input v-model="dataFimSelecionada" type="datetime-local"
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-blue-500 transition" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </Transition>
 
-        </main>
+                <div class="flex gap-4">
+                    <button @click="mostrarModalConfirmar = false"
+                        class="flex-1 bg-gray-200 text-gray-700 font-black uppercase py-4 rounded-2xl hover:bg-gray-300 transition">Cancelar</button>
+                    <button @click="confirmarReserva"
+                        class="flex-1 bg-blue-600 text-white font-black uppercase py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </Transition>
+
+    </main>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
 import socket from '@/services/socket';
@@ -208,7 +281,7 @@ const userInitial = ref('A');
 const listaEquipamentos = ref([]);
 
 const mostrarModalConfirmar = ref(false);
-const reservaAtiva = ref(null); 
+const reservaAtiva = ref(null);
 const usuarioLogado = ref({}); // Mostrar nome/email no resumo
 
 const user = ref(null);
@@ -224,7 +297,7 @@ const equipamentoForm = ref({ id_equip: null, nome: '', numero_serie: '', observ
 const prepararReserva = (equipamento) => {
     const userData = JSON.parse(sessionStorage.getItem('user') || '{}');
     usuarioLogado.value = userData;
-    
+
     const agora = new Date();
     const umaHoraDepois = new Date(agora.getTime() + 3600000);
 
@@ -244,19 +317,19 @@ const confirmarReserva = async () => {
     }
 
     try {
-        const payload = { 
-            id_equip: reservaAtiva.value.id_equip, 
-            data_inicio: dataInicioSelecionada.value, 
-            data_fim: dataFimSelecionada.value,      
+        const payload = {
+            id_equip: reservaAtiva.value.id_equip,
+            data_inicio: dataInicioSelecionada.value,
+            data_fim: dataFimSelecionada.value,
             observacao: "Reserva realizada pelo painel de controle"
         };
 
         await api.post('/reservas/', payload);
-        
+
         mostrarModalConfirmar.value = false;
         await carregarDados();
         notify('Reservado!', 'Sua reserva foi confirmada com sucesso.', 'success');
-    } catch (e) { 
+    } catch (e) {
         notify('Erro na Reserva', e.response?.data?.error || 'Falha na conexão', 'error');
     }
 };
@@ -284,7 +357,7 @@ const carregarDados = async () => {
         const response = await api.get('/equipamentos/');
         listaEquipamentos.value = response.data;
     } catch (e) { console.error("Erro Front carregarDados:", e); }
-}; 
+};
 
 const abrirModalCriar = () => {
     isEditing.value = false;
@@ -295,7 +368,7 @@ const abrirModalCriar = () => {
 const abrirModalEditar = (item) => {
     isEditing.value = true;
     // Criamos uma cópia para não editar direto na tabela!!
-    equipamentoForm.value = { ...item }; 
+    equipamentoForm.value = { ...item };
     mostrarModalCriar.value = true;
 };
 
@@ -318,11 +391,11 @@ const salvarEquipamento = async () => {
 // REMOVER Equipamento
 const removerEquipamento = async () => {
     const confirmacao = await notify(
-        'Tem certeza?', 
-        'Isso excluirá o equipamento permanentemente!', 
+        'Tem certeza?',
+        'Isso excluirá o equipamento permanentemente!',
         'warning'
     );
-    
+
     if (confirmacao.isConfirmed) {
         try {
             await api.delete(`/equipamentos/${equipamentoForm.value.id_equip}`);
@@ -345,9 +418,9 @@ const handleCancelarReserva = async (item) => {
 
     if (confirmacao.isConfirmed) {
         try {
-            
+
             await api.delete(`/reservas/${item.id_reserva_ativa}`);
-            
+
             await carregarDados();
             notify('Sucesso', 'Reserva cancelada e equipamento liberado!', 'success');
         } catch (e) {
@@ -358,22 +431,22 @@ const handleCancelarReserva = async (item) => {
 };
 
 const fecharModalCriar = () => { mostrarModalCriar.value = false; };
- 
+
 onMounted(() => {
     const userData = sessionStorage.getItem('user');
-    
+
     if (userData && userData !== "[object Object]") {
         const parsedUser = JSON.parse(userData);
-        
+
         user.value = parsedUser;
-        
+
         userName.value = parsedUser.nome || 'Nome';
         userInitial.value = userName.value.charAt(0).toUpperCase();
-        
+
         console.log("Sistema identificou seu ID como:", user.value.id);
     } else {
         console.error("Erro: Usuário não encontrado no sessionStorage!");
-        router.push('/'); 
+        router.push('/');
     }
 
     carregarDados();
@@ -382,10 +455,71 @@ onMounted(() => {
 
 onUnmounted(() => { socket.off("atualizar_lista"); });
 
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+// Calcula o total das páginas
+const totalPages = computed(() => {
+    const total = Math.ceil(filteredEquipamentos.value.length / itemsPerPage);
+    return total > 0 ? total : 1;
+});
+
+// Filtra a lista para exibir apenas os itens da página atual
+const paginatedEquipamentos = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredEquipamentos.value.slice(start, end);
+});
+
+
+// Funções de navegação
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) currentPage.value--;
+};
+
+// Reiniciar para a página 1 sempre que a lista for recarregada
+const buscarEquipamentos = async () => {
+    try {
+        const response = await api.get('/equipamentos/');
+        listaEquipamentos.value = response.data;
+        currentPage.value = 1;
+    } catch (error) {
+        console.error("Erro ao buscar equipamentos:", error);
+    }
+};
+
+// FUNÇÃO PARA A BUSCAS
+const searchQuery = ref('');
+const statusFilter = ref('');
+
+const filteredEquipamentos = computed(() => {
+    return listaEquipamentos.value.filter(item => {
+        const matchesName = item.nome.toLowerCase().includes(searchQuery.value.toLowerCase());
+        const matchesStatus = statusFilter.value ? item.status === statusFilter.value : true;
+        return matchesName && matchesStatus;
+    });
+});
+
+watch([searchQuery, statusFilter], () => {
+    currentPage.value = 1;
+});
+
+
 
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 </style>
