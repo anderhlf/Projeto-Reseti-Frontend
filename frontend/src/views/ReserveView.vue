@@ -366,9 +366,16 @@ const abrirModalCriar = () => {
 };
 
 const abrirModalEditar = (item) => {
+    
     isEditing.value = true;
-    // Criamos uma cópia para não editar direto na tabela!!
-    equipamentoForm.value = { ...item };
+    equipamentoForm.value = {
+        id_equip: item.id_equip,
+        nome: item.nome,
+        
+        numero_serie: item.numero_serie || item.num_serie || '', 
+        observacao: item.observacao || item.obs || '',
+        status: item.status || 'Disponível'
+    };
     mostrarModalCriar.value = true;
 };
 
