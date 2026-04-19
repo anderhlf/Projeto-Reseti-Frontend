@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import LoginView from "../views/LoginView.vue";
-import RegisterView from "../views/RegisterView.vue";
-import ForgotPasswordView from "../views/ForgotPasswordView.vue";
+import LoginView from "../views/autenticacao/LoginView.vue";
+import RegisterView from "../views/autenticacao/RegisterView.vue";
+import ForgotPasswordView from "../views/autenticacao/ForgotPasswordView.vue";
 import DashboardView from "../views/DashboardView.vue";
-import ReserveView from "../views/ReserveView.vue"; 
+import ReserveView from "../views/ambiente-reserva/ReserveView.vue"; 
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,7 +26,7 @@ const router = createRouter({
     {
       path: '/reset-senha/:token',
       name: 'ResetSenha',
-      component: () => import('../views/ResetSenha.vue')
+      component: () => import('../views/autenticacao/ResetSenha.vue')
     },
     {
       path: "/dashboard",
@@ -43,13 +43,13 @@ const router = createRouter({
     {
       path: '/minhas-reservas',
       name: 'MinhasReservas',
-      component: () => import('@/views/MinhasReservas.vue'),
+      component: () => import('@/views/ambiente-reserva/MinhasReservas.vue'),
       meta: { requiresAuth: true }
     },
     {
     path: '/solicitacoes',
     name: 'Solicitacoes',
-    component: () => import('../views/SolicitacoesView.vue'),
+    component: () => import('../views/ambiente-reserva/SolicitacoesView.vue'),
     meta: { requiresAuth: true }
     },
     {

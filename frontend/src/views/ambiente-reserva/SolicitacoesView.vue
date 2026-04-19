@@ -1,5 +1,4 @@
 <!--CAMPO PARA VISUALIZAR TODAS AS RESERVAS-->
-
 <template>
     <div class="min-h-screen flex font-sans bg-cover bg-center bg-no-repeat bg-fixed"
         style="background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070');">
