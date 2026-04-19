@@ -33,7 +33,7 @@
                             Minhas Reservas
                         </button>
 
-                        <button v-if="user?.permissao === 'Adm'" @click="irParaSolicitacoes"
+                        <button v-if="user?.permissao === 'Adm'" @click="$router.push('/solicitacoes')"
                             class="bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                             Ver Solicitações
                         </button>

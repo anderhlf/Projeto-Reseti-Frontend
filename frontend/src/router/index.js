@@ -47,6 +47,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+    path: '/solicitacoes',
+    name: 'Solicitacoes',
+    component: () => import('../views/SolicitacoesView.vue'),
+    meta: { requiresAuth: true }
+    },
+    {
       path: "/abertura-os",
       name: "AberturaOS",
       component: () => import('../views/AberturaOSView.vue'),
