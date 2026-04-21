@@ -55,7 +55,7 @@ const router = createRouter({
     {
       path: "/abertura-os",
       name: "AberturaOS",
-      component: () => import('../views/AberturaOSView.vue'),
+      component: () => import('../views/ambiente-os/AberturaOSView.vue'),
       meta: { requiresAuth: true }
     },
     {
