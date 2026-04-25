@@ -300,18 +300,20 @@ const prepararReserva = (equipamento) => {
     usuarioLogado.value = userData;
 
     const agora = new Date();
-    const umaHoraDepois = new Date(agora.getTime() + 3600000);
+    
+    const fusoHorarioMs = agora.getTimezoneOffset() * 60000;
+    const dataLocalInicio = new Date(agora.getTime() - fusoHorarioMs);
+    const dataLocalFim = new Date(agora.getTime() - fusoHorarioMs + (60 * 60 * 1000)); // +1 hora
 
-    // Formata para o padrão datetime-local  (AAAA-MM-DDTHH:MM)
-    dataInicioSelecionada.value = agora.toISOString().slice(0, 16);
-    dataFimSelecionada.value = umaHoraDepois.toISOString().slice(0, 16);
+    // Formata para o padrão datetime-local (AAAA-MM-DDTHH:MM)
+    dataInicioSelecionada.value = dataLocalInicio.toISOString().slice(0, 16);
+    dataFimSelecionada.value = dataLocalFim.toISOString().slice(0, 16);
 
-    reservaAtiva.value = { ...equipamento };
+    reservaAtiva.value = { ...equipamento }; 
     mostrarModalConfirmar.value = true;
 };
 
 const confirmarReserva = async () => {
-    // Validação data fim não pode ser antes da início
     if (new Date(dataFimSelecionada.value) <= new Date(dataInicioSelecionada.value)) {
         notify('Atenção', 'A data de término deve ser posterior à de início!', 'warning');
         return;
@@ -328,7 +330,9 @@ const confirmarReserva = async () => {
         await api.post('/reservas/', payload);
 
         mostrarModalConfirmar.value = false;
-        await carregarDados();
+        
+        await buscarEquipamentos(); 
+        
         notify('Reservado!', 'Sua reserva foi confirmada com sucesso.', 'success');
     } catch (e) {
         notify('Erro na Reserva', e.response?.data?.error || 'Falha na conexão', 'error');
@@ -445,20 +449,21 @@ onMounted(() => {
 
     if (userData && userData !== "[object Object]") {
         const parsedUser = JSON.parse(userData);
-
         user.value = parsedUser;
-
         userName.value = parsedUser.nome || 'Nome';
         userInitial.value = userName.value.charAt(0).toUpperCase();
-
         console.log("Sistema identificou seu ID como:", user.value.id);
     } else {
         console.error("Erro: Usuário não encontrado no sessionStorage!");
         router.push('/');
     }
 
-    carregarDados();
-    socket.on("atualizar_lista", carregarDados);
+    buscarEquipamentos(); 
+
+    socket.on("atualizar_lista", () => {
+        console.log(">>> Socket: Recebi sinal de atualização. Recarregando lista...");
+        buscarEquipamentos(); 
+    });
 });
 
 onUnmounted(() => { socket.off("atualizar_lista"); });
