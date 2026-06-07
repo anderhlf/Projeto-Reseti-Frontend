@@ -386,11 +386,15 @@ const abrirModalEditar = (item) => {
 
 const salvarEquipamento = async () => {
     try {
+        const { nome, numero_serie, observacao, status } = equipamentoForm.value;
+
         if (isEditing.value) {
-            await api.put(`/equipamentos/${equipamentoForm.value.id_equip}`, equipamentoForm.value);
+            await api.put(`/equipamentos/${equipamentoForm.value.id_equip}`, {
+                nome, numero_serie, observacao, status
+            });
             notify('Atualizado', 'Equipamento atualizado com sucesso!', 'success');
         } else {
-            await api.post('/equipamentos/', equipamentoForm.value);
+            await api.post('/equipamentos/', { nome, numero_serie, observacao, status });
             notify('Cadastrado', 'Novo equipamento adicionado!', 'success');
         }
         fecharModalCriar();

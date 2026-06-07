@@ -25,10 +25,16 @@
                         <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Histórico de
                             solicitações pessoais</p>
                     </div>
-                    <button @click="$router.push('/reserva')"
-                        class="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
-                        Reservar Novo Equipamento
-                    </button>
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <input v-model="searchQuery" type="text" placeholder="Buscar solicitante ou item..."
+                                class="bg-white/60 border border-white/40 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-blue-500 w-64 transition" />
+                        </div>
+                        <button @click="$router.push('/reserva')"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-black uppercase px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                            Reservar Novo Equipamento
+                        </button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto flex-1">
@@ -62,7 +68,7 @@
                                     </button>
                                 </td>
                             </tr>
-                            <tr v-if="minhasReservas.length === 0">
+                            <tr v-if="reservasFiltradas.length === 0">
                                 <td colspan="5" class="text-center py-10 text-gray-500 font-bold uppercase text-xs">
                                     Nenhuma reserva encontrada.</td>
                             </tr>
@@ -93,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import Sidebar from '@/components/Sidebar.vue';
 import { notify } from '@/utils/notificacoes';
@@ -101,16 +107,35 @@ import { notify } from '@/utils/notificacoes';
 const minhasReservas = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = 10;
+const searchQuery = ref('');
+
+const userRaw = sessionStorage.getItem('user');
+const user = userRaw && userRaw !== "[object Object]" ? JSON.parse(userRaw) : {};
+const token = sessionStorage.getItem('token');
+
+const userName = computed(() => user.nome || 'Usuário');
+const userInitial = computed(() => user.nome ? user.nome.charAt(0) : 'U');
+
+const reservasFiltradas = computed(() => {
+    return minhasReservas.value.filter(res =>
+        (res.solicitante || userName.value).toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        res.equipamento.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+});
 
 const totalPages = computed(() => {
-    const total = Math.ceil(minhasReservas.value.length / itemsPerPage);
+    const total = Math.ceil(reservasFiltradas.value.length / itemsPerPage);
     return total > 0 ? total : 1;
 });
 
 const reservasPaginadas = computed(() => {
     const inicio = (currentPage.value - 1) * itemsPerPage;
     const fim = inicio + itemsPerPage;
-    return minhasReservas.value.slice(inicio, fim);
+    return reservasFiltradas.value.slice(inicio, fim);
+});
+
+watch(searchQuery, () => {
+    currentPage.value = 1;
 });
 
 const nextPage = () => {
@@ -120,13 +145,6 @@ const nextPage = () => {
 const prevPage = () => {
     if (currentPage.value > 1) currentPage.value--;
 };
-
-const userRaw = sessionStorage.getItem('user');
-const user = userRaw && userRaw !== "[object Object]" ? JSON.parse(userRaw) : {};
-const token = sessionStorage.getItem('token');
-
-const userName = computed(() => user.nome || 'Usuário');
-const userInitial = computed(() => user.nome ? user.nome.charAt(0) : 'U');
 
 const fetchMinhasReservas = async () => {
     if (!user.id_user) return;
@@ -166,6 +184,7 @@ const cancelarMinhaReserva = async (reserva) => {
         }
     }
 };
+
 
 onMounted(fetchMinhasReservas);
 </script>
