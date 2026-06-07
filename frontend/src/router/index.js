@@ -59,6 +59,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: "/nova-os",
+      name: "NovaOS",
+      component: () => import('@/views/ambiente-os/NovaOS.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: "/usuarios",
       name: "GerenciadorUsuario",
       component: () => import('../views/UserManagementView.vue'),
