@@ -34,7 +34,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="res in solicitacoesFiltradas" :key="res.id_reserva" class="bg-white/40 hover:bg-white/60 transition-colors shadow-sm rounded-2xl">
+                            <tr v-for="res in solicitacoesPaginadas" :key="res.id_reserva" class="bg-white/40 hover:bg-white/60 transition-colors shadow-sm rounded-2xl">
                                 <td class="py-4 pl-6 font-bold text-gray-800 uppercase text-xs">{{ res.equipamento }}</td>
                                 <td class="py-4 font-black text-blue-700 text-[11px] uppercase">{{ res.solicitante }}</td>
                                 <td class="py-4 text-[10px] font-bold text-gray-600">
@@ -60,6 +60,24 @@
 
                     <div v-if="loading" class="text-center py-10 font-black text-blue-600 animate-pulse">CARREGANDO SOLICITAÇÕES...</div>
                     <div v-if="!loading && solicitacoesFiltradas.length === 0" class="text-center py-10 text-gray-400 font-bold">Nenhuma reserva encontrada.</div>
+                </div>
+
+                <!--VOLTAR + PAGINAÇÃO-->
+                <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
+                    <button @click="$router.go(-1)" class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Voltar</button>
+                    <div class="flex items-center gap-4">
+                        <button @click="prevPage" :disabled="currentPage === 1" type="button" class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Página {{ currentPage }} de {{ totalPages }}</span>
+                        <button @click="nextPage" :disabled="currentPage === totalPages" type="button" class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -93,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
 import socket from '@/services/socket';
@@ -114,6 +132,7 @@ const carregarSolicitacoes = async () => {
         loading.value = true;
         const response = await api.get('/reservas/todas');
         listaSolicitacoes.value = response.data;
+        currentPage.value = 1;
     } catch (e) {
         notify('Erro', 'Não foi possível carregar as solicitações.', 'error');
     } finally {
@@ -127,6 +146,32 @@ const solicitacoesFiltradas = computed(() => {
         res.solicitante.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
         res.equipamento.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
+});
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalPages = computed(() => {
+    const total = Math.ceil(solicitacoesFiltradas.value.length / itemsPerPage);
+    return total > 0 ? total : 1;
+});
+
+const solicitacoesPaginadas = computed(() => {
+    const inicio = (currentPage.value - 1) * itemsPerPage;
+    const fim = inicio + itemsPerPage;
+    return solicitacoesFiltradas.value.slice(inicio, fim);
+});
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) currentPage.value--;
+};
+
+watch(searchQuery, () => {
+    currentPage.value = 1;
 });
 
 const statusClass = (status) => {

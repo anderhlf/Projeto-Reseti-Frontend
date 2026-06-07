@@ -20,7 +20,7 @@
 
             <div
                 class="bg-white/80 backdrop-blur-xl rounded-[35px] border border-white/50 p-8 shadow-xl flex-1 flex flex-col">
-                <<div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-3xl font-black text-gray-900 uppercase tracking-tighter italic">Área de Reserva
                         </h2>
@@ -53,7 +53,7 @@
                 <div class="relative min-w-[160px]">
                     <select v-model="statusFilter"
                         class="w-full bg-white/50 border-2 border-blue-600/20 rounded-lg px-4 py-1.5 text-[10px] font-black uppercase outline-none focus:border-blue-600 transition appearance-none cursor-pointer">
-                        <option value="">STATUS</option>
+                        <option value="">TODOS</option>
                         <option value="Disponível">DISPONÍVEL</option>
                         <option value="Reservado">RESERVADO</option>
                         <option value="Manutenção">MANUTENÇÃO</option>

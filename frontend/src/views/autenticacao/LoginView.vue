@@ -106,7 +106,6 @@
                 email: loginValue.value,
                 senha: password.value
             });
-            // TODO Teste
             console.log("Dados recebidos do servidor:", response.data.user);
 
             if (response.data.token) {
