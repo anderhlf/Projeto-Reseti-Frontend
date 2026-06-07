@@ -43,7 +43,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="reserva in minhasReservas" :key="reserva.id_reserva"
+                            <tr v-for="reserva in reservasPaginadas" :key="reserva.id_reserva"
                                 class="bg-white/40 hover:bg-white/60 transition-colors shadow-sm rounded-2xl">
                                 <td class="py-4 pl-6 font-bold text-gray-800 uppercase text-xs">{{ reserva.equipamento
                                     }}</td>
@@ -70,9 +70,22 @@
                     </table>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-gray-200/50">
-                    <button @click="$router.go(-1)"
-                        class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Voltar</button>
+                <!--VOLTAR + PAGINAÇÃO-->
+                <div class="mt-8 flex justify-between items-center border-t border-gray-200/50 pt-6">
+                    <button @click="$router.go(-1)" class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">Voltar</button>
+                    <div class="flex items-center gap-4">
+                        <button @click="prevPage" :disabled="currentPage === 1" type="button" class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Página {{ currentPage }} de {{ totalPages }}</span>
+                        <button @click="nextPage" :disabled="currentPage === totalPages" type="button" class="p-2 rounded-lg hover:bg-blue-50 disabled:opacity-20 transition-all text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -86,6 +99,28 @@ import Sidebar from '@/components/Sidebar.vue';
 import { notify } from '@/utils/notificacoes';
 
 const minhasReservas = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalPages = computed(() => {
+    const total = Math.ceil(minhasReservas.value.length / itemsPerPage);
+    return total > 0 ? total : 1;
+});
+
+const reservasPaginadas = computed(() => {
+    const inicio = (currentPage.value - 1) * itemsPerPage;
+    const fim = inicio + itemsPerPage;
+    return minhasReservas.value.slice(inicio, fim);
+});
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) currentPage.value--;
+};
+
 const userRaw = sessionStorage.getItem('user');
 const user = userRaw && userRaw !== "[object Object]" ? JSON.parse(userRaw) : {};
 const token = sessionStorage.getItem('token');
@@ -101,6 +136,7 @@ const fetchMinhasReservas = async () => {
             headers: { Authorization: `Bearer ${token}` } // Se você usar o token
         });
         minhasReservas.value = response.data;
+        currentPage.value = 1;
     } catch (error) {
         notify('Erro', 'Falha ao carregar', 'error');
     }
