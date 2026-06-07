@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken } from "./auth";
 
 const api = axios.create({
     baseURL: `http://${window.location.hostname}:5000`, // URL do Flask
@@ -6,11 +7,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = sessionStorage.getItem("token");
+        const token = getToken();
         if (token) {
-
-        config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `Bearer ${token}`;
         }
+
+        config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        config.headers['Pragma'] = 'no-cache';
+
         return config;
     },
     (error) => {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { estaLogado, ehAdmin } from "@/services/auth";
 import LoginView from "../views/autenticacao/LoginView.vue";
 import RegisterView from "../views/autenticacao/RegisterView.vue";
 import ForgotPasswordView from "../views/autenticacao/ForgotPasswordView.vue";
@@ -79,27 +80,28 @@ const router = createRouter({
     {
       path: "/usuarios",
       name: "GerenciadorUsuario",
-      component: () => import('../views/UserManagementView.vue'),
-      meta: { requiresAdmin: true }
+      component: () => import('../views/ambiente-usuarios/Usuarios.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/usuarios/novo",
+      name: "NovoUsuario",
+      component: () => import('../views/ambiente-usuarios/NovoUsuario.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/usuarios/editar/:id",
+      name: "EditarUsuario",
+      component: () => import('../views/ambiente-usuarios/NovoUsuario.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  const loggedIn = sessionStorage.getItem('user') // Verifica se existe usuário logado
-
-  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    next('/')
-  } else {
-    next()
-  }
-})
-
-router.beforeEach((to, from, next) => {
-  const userData = sessionStorage.getItem('user');
-  const user = userData && userData !== "[object Object]" ? JSON.parse(userData) : null;
-
-  if (to.matched.some(record => record.meta.requiresAdmin) && user?.permissao !== 'Adm') {
+  if (to.matched.some(record => record.meta.requiresAuth) && !estaLogado()) {
+    next('/');
+  } else if (to.matched.some(record => record.meta.requiresAdmin) && !ehAdmin()) {
     next('/dashboard');
   } else {
     next();

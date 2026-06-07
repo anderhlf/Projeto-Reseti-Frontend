@@ -69,8 +69,9 @@
 
 <script setup>
     import { ref } from 'vue';
-    import api from '@/services/api'; // TODO Importante* Conecta em outras View ou componenetes essa importação
+    import api from '@/services/api';
     import { useRouter } from 'vue-router';
+    import { setSessao } from '@/services/auth';
     import { notify } from '@/utils/notificacoes';
     import { validarEmailBasico } from '@/utils/validador';
 
@@ -109,8 +110,7 @@
             console.log("Dados recebidos do servidor:", response.data.user);
 
             if (response.data.token) {
-                sessionStorage.setItem('user', JSON.stringify(response.data.user)); 
-                sessionStorage.setItem('token', response.data.token);
+                setSessao(response.data.token, response.data.user);
 
                 notify('Bem-vindo!', 'Login realizado com sucesso', 'success');
                 router.push('/dashboard');

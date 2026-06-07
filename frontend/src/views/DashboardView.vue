@@ -78,10 +78,11 @@
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
 import socket from '@/services/socket';
+import { inicialUsuario, nomeUsuario } from '@/services/auth';
 import { ref, onMounted, onUnmounted } from 'vue';
 
-const userName = ref('Carregando...');
-const userInitial = ref('?');
+const userName = nomeUsuario;
+const userInitial = inicialUsuario;
 
 const stats = ref({ 
   os_pendentes: 0, 
@@ -113,15 +114,6 @@ const buscarInformacoes = async () => {
 };
 
 onMounted(async () => {
-  const userData = sessionStorage.getItem('user');
-  const user = (userData && userData !== "[object Object]") ? JSON.parse(userData) : {};
-  
-  if (userData) {
-    const user = JSON.parse(userData);
-    userName.value = user.nome;
-    userInitial.value = user.nome.charAt(0).toUpperCase();
-  }
-
   await buscarInformacoes();
 
   socket.on("atualizar_lista", () => {

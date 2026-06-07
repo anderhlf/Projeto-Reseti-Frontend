@@ -29,8 +29,8 @@
         <span>Abertura OS</span>
       </router-link>
 
-      <router-link v-if="user.permissao === 'Adm'" to="/usuarios" 
-        :class="[$route.path === '/usuarios' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/40' : 'text-gray-700 hover:bg-white/50', 'flex items-center gap-4 p-4 rounded-2xl transition group font-semibold text-sm']">
+      <router-link v-if="usuario?.permissao === 'Adm'" to="/usuarios" 
+        :class="[$route.path.startsWith('/usuarios') ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/40' : 'text-gray-700 hover:bg-white/50', 'flex items-center gap-4 p-4 rounded-2xl transition group font-semibold text-sm']">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
@@ -45,14 +45,28 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { usuario, limparSessao } from '@/services/auth';
 
 const router = useRouter();
-const userData = sessionStorage.getItem('user');
-const user = userData && userData !== "[object Object]" ? JSON.parse(userData) : {};
+
+const handleSessaoAtualizada = (evento) => {
+    if (evento.detail) {
+        usuario.value = evento.detail;
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('usuario-sessao-atualizado', handleSessaoAtualizada);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('usuario-sessao-atualizado', handleSessaoAtualizada);
+});
 
 const handleLogout = () => {
-    sessionStorage.clear(); 
+    limparSessao();
     router.push('/');
 };
 </script>

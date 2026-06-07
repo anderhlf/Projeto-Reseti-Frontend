@@ -118,15 +118,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import Sidebar from '@/components/Sidebar.vue';
 import api from '@/services/api';
+import { usuario, inicialUsuario as inicialUsuarioAuth } from '@/services/auth';
 import { notify } from '@/utils/notificacoes';
 
 const router = useRouter();
-
-const usuario = ref({ nome: '', id_user: null });
 const enviando = ref(false);
 const arquivoAnexo = ref(null);
 const nomeArquivo = ref('');
@@ -148,12 +147,7 @@ const formulario = reactive({
   prioridade: '',
 });
 
-const inicialUsuario = computed(() => usuario.value.nome?.charAt(0).toUpperCase() || 'A');
-
-onMounted(() => {
-  const dadosUsuario = sessionStorage.getItem('user');
-  if (dadosUsuario) usuario.value = JSON.parse(dadosUsuario);
-});
+const inicialUsuario = inicialUsuarioAuth;
 
 const selecionarArquivo = (evento) => {
   const arquivo = evento.target.files[0];
