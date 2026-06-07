@@ -29,10 +29,6 @@
             </p>
           </div>
 
-          <button @click="$router.go(-1)"
-            class="bg-gray-800 hover:bg-black text-white text-[10px] font-black uppercase px-8 py-3 rounded-xl shadow-lg transition active:scale-95">
-            Voltar
-          </button>
         </div>
 
         <div class="flex-1 flex items-center justify-center w-full">

@@ -65,6 +65,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/minhas-os',
+      name: 'MinhasOS',
+      component: () => import('@/views/ambiente-os/MinhasOS.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/solicitacoes-os',
+      name: 'VerSolicitacaoOS',
+      component: () => import('@/views/ambiente-os/VerSolicitacao.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
       path: "/usuarios",
       name: "GerenciadorUsuario",
       component: () => import('../views/UserManagementView.vue'),
@@ -87,8 +99,7 @@ router.beforeEach((to, from, next) => {
   const userData = sessionStorage.getItem('user');
   const user = userData && userData !== "[object Object]" ? JSON.parse(userData) : null;
 
-  if (to.path === '/usuarios' && user?.permissao !== 'Adm') {
-    // Se tentar entrar em usuários sem ser Adm, manda pro Dashboard
+  if (to.matched.some(record => record.meta.requiresAdmin) && user?.permissao !== 'Adm') {
     next('/dashboard');
   } else {
     next();
